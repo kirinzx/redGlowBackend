@@ -3,7 +3,9 @@ package middleware
 import (
 	"context"
 	"net/http"
+	"redGlow/internal/config"
 	"redGlow/internal/service"
+	"redGlow/internal/tools"
 
 	"go.uber.org/zap"
 )
@@ -11,37 +13,38 @@ import (
 type authMiddleware struct {
 	service service.AuthService
 	logger *zap.Logger
+	cfg *config.Config
 }
 
-func NewAuthMiddleware(service service.AuthService, logger *zap.Logger) *authMiddleware{
+func NewAuthMiddleware(service service.AuthService, logger *zap.Logger, cfg *config.Config) *authMiddleware{
 	return &authMiddleware{
 		service: service,
 		logger: logger,
+		cfg: cfg,
 	}
 }
 
-func getContext(service service.AuthService, logger *zap.Logger, r *http.Request) context.Context{
-	sessionID, err := r.Cookie("sessionID")
+func getContext(am *authMiddleware, r *http.Request) context.Context{
+	sessionID, err := r.Cookie(am.cfg.AuthSettings.SessionCookieName)
 	
 	if err != nil {
-		logger.Error(err.Error())
+		am.logger.Error(err.Error())
 		return r.Context()
 	}
 
-	userSession, err := service.GetSession(r.Context(),sessionID.Value)
+	userSession, _ := am.service.GetSession(r.Context(),sessionID.Value)
 
-	if err != nil && userSession != nil {
-		logger.Error(err.Error())
+	if userSession == nil {
 		return r.Context()
 	}
 	
-	return context.WithValue(r.Context(), "userSession", userSession)
+	return context.WithValue(r.Context(), tools.ContextSessionKey, userSession)
 }
 
-func middlewareFunc(service service.AuthService, logger *zap.Logger) func(http.Handler) http.Handler{
+func middlewareFunc(am *authMiddleware) func(http.Handler) http.Handler{
 	return func(next http.Handler) http.Handler{
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
-			newCtx := getContext(service, logger, r)
+			newCtx := getContext(am, r)
 			
 			next.ServeHTTP(w, r.WithContext(newCtx))
 		})
@@ -50,5 +53,5 @@ func middlewareFunc(service service.AuthService, logger *zap.Logger) func(http.H
 
 
 func (am *authMiddleware) GetMiddlewareFunc() func(http.Handler) http.Handler{
-	return middlewareFunc(am.service, am.logger)
+	return middlewareFunc(am)
 }

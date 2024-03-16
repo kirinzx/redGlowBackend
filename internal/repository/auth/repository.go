@@ -88,19 +88,10 @@ func (repo *authRepository) SaveSessionID(ctx context.Context, session *model.Us
 func (repo *authRepository) GetSession(ctx context.Context, sessionID string) (*model.UserSession, error) {
 	
 	var userSession model.UserSession
-	conn := repo.RedisDB.Client.Conn()
-	defer conn.Close()
-	value := conn.Get(ctx,sessionID)
-	if value.Err() != nil {
-		return nil, value.Err()
-	}
-	jsonBytes, err := value.Bytes()
-	if err != nil{
+	err := repo.RedisDB.Get(ctx, sessionID, &userSession)
+	if err != nil {
 		return nil, err
 	}
-	json.Unmarshal(jsonBytes,&userSession)
-	value.Scan(userSession)
-
 	return &userSession, nil
 }
 

@@ -11,15 +11,17 @@ import (
 )
 
 type Config struct {
-    HTTPServer `yaml:"http_server"`
-    PostgresDB `yaml:"postgres"`
-    RedisDB `yaml:"redis"`
+    Server HTTPServer `yaml:"http_server"`
+    Postgres PostgresDB `yaml:"postgres"`
+    Redis RedisDB `yaml:"redis"`
+    AuthSettings Auth `yaml:"auth"`
 }
 
 type HTTPServer struct {
-    Address     string        `yaml:"address" env-default:"0.0.0.0:8000"`
-    Timeout     time.Duration `yaml:"timeout" env-default:"5s"`
-    IdleTimeout time.Duration `yaml:"idle_timeout" env-default:"60s"`
+    Host string `yaml:"host"`
+    Port string `yaml:"port"`
+    Timeout     time.Duration `yaml:"timeout"`
+    IdleTimeout time.Duration `yaml:"idle_timeout"`
 }
 
 type PostgresDB struct {
@@ -35,6 +37,12 @@ type RedisDB struct {
     RedisPassword string `yaml:"password"`
     RedisDB int `yaml:"db"`
     RedisUsername string `yaml:"username"`
+}
+
+type Auth struct {
+    SecretWord string `yaml:"secret_word"`
+    SessionExpiration time.Duration `yaml:"session_expiration"`
+    SessionCookieName string `yaml:"session_cookie_name"`
 }
 
 func NewConfig(logger *zap.Logger) *Config {

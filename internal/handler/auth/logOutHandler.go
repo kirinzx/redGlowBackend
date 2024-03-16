@@ -3,8 +3,6 @@ package auth
 import (
 	"net/http"
 	"redGlow/internal/handler"
-	"redGlow/internal/httpError"
-	"redGlow/internal/model"
 	"redGlow/internal/service"
 	"redGlow/internal/tools"
 
@@ -27,14 +25,14 @@ func NewLogOutHandler(logger *zap.Logger, service service.AuthService) *logOutHa
 }
 
 func (handler *logOutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	userSession, ok := r.Context().Value("userSession").(*model.UserSession)
-
-	if !ok || userSession == nil {
-		tools.HandleErrors(w, httpError.NewForbiddenError("You are't logged in"), handler.logger)
+	userSession, err := tools.CheckIfAuthenticated(r,handler.logger)
+	if err != nil {
+		tools.HandleErrors(w,err,handler.logger)
 		return
 	}
 
-	err := handler.service.DeleteSession(r.Context(), userSession.HashedSessionID)
+	err = handler.service.DeleteSession(r.Context(), userSession.HashedSessionID)
+	
 	if err != nil{
 		tools.HandleErrors(w, err, handler.logger)
 		return

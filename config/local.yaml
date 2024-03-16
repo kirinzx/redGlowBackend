@@ -1,5 +1,6 @@
 http_server:
-  address: "localhost:8000"
+  host: "localhost"
+  port: "8000"
   timeout: 4s
   idle_timeout: 30s
 postgres:
@@ -13,3 +14,7 @@ redis:
   password: ${REDIS_PASSWORD}
   db: ${REDIS_DB}
   username: ${REDIS_USERNAME}
+auth:
+  secret_word: ${SECRET_WORD}
+  session_expiration: 744h
+  session_cookie_name: "sessionID"

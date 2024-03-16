@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"redGlow/internal/config"
 
@@ -12,8 +13,8 @@ import (
 
 func NewHTTPServer(lc fx.Lifecycle, cfg *config.Config, router chi.Router, logger *zap.Logger) *http.Server {
     server := &http.Server{
-		Addr:    cfg.HTTPServer.Address,
-        IdleTimeout: cfg.HTTPServer.IdleTimeout,
+		Addr:    fmt.Sprintf("%s:%s",cfg.Server.Host, cfg.Server.Port),
+        IdleTimeout: cfg.Server.IdleTimeout,
 		Handler: router,
 	}
 

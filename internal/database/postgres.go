@@ -15,8 +15,8 @@ type PostgresDB struct{
 
 func NewPostgresDB(cfg *config.Config, ctx context.Context, logger *zap.Logger) *PostgresDB{
 	dbConnectString := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		cfg.PostgresDB.PostgresUser, cfg.PostgresDB.PostgresPassword, cfg.PostgresDB.PostgresHost,
-		cfg.PostgresDB.PostgresPort, cfg.PostgresDB.PostgresDatabaseName,
+		cfg.Postgres.PostgresUser, cfg.Postgres.PostgresPassword, cfg.Postgres.PostgresHost,
+		cfg.Postgres.PostgresPort, cfg.Postgres.PostgresDatabaseName,
 	)
 
     pool, err := pgxpool.New(ctx, dbConnectString)

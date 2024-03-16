@@ -7,22 +7,24 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net/http"
+	"redGlow/internal/config"
 	"redGlow/internal/httpError"
 	"redGlow/internal/model"
 	"redGlow/internal/repository"
 	"redGlow/internal/service"
-	"time"
 )
 
 var _ service.AuthService = (*authService)(nil)
 
 type authService struct {
 	repo repository.AuthRepository
+	cfg *config.Config
 }
 
-func NewAuthService(repo repository.AuthRepository) *authService{
+func NewAuthService(repo repository.AuthRepository, cfg *config.Config) *authService{
 	return &authService{
 		repo: repo,
+		cfg: cfg,
 	}
 }
 
@@ -46,14 +48,19 @@ func (service *authService) Login(ctx context.Context, creds *model.Credentials,
 	}
 	userSession.HashedSessionID = service.HashSessionID(ctx, unhashedSessionID)
 	
-	if err := service.repo.SaveSessionID(ctx, userSession, time.Hour * 24 * 60); err != nil {
+	if err := service.repo.SaveSessionID(ctx, userSession, service.cfg.AuthSettings.SessionExpiration); err != nil {
 		return nil, err
-	} 
-	sessionCookie := fmt.Sprintf("sessionID=%s; Domain=localhost;Expires=; HttpOnly=True; SameSite=None",unhashedSessionID)
-	w.Header().Add(
-		"Set-Cookie",
-		sessionCookie,
-	)
+	}
+
+	cookie := &http.Cookie{
+		Name: service.cfg.AuthSettings.SessionCookieName,
+		Value: unhashedSessionID,
+		MaxAge: int(service.cfg.AuthSettings.SessionExpiration.Seconds()),
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+	}
+	http.SetCookie(w,cookie)
+
 	return &userSession.UserData, nil
 }
 
@@ -66,7 +73,7 @@ func (service *authService) ChangeForgottenPassword(ctx context.Context, passwor
 }
 
 func (service *authService) GenerateSessionID(session *model.UserSession) (string, httpError.HTTPError){
-	randomBytes := make([]byte, 16)
+	randomBytes := make([]byte, 32)
 
     _,err := rand.Read(randomBytes)
 	if err != nil{

@@ -24,6 +24,12 @@ func NewLogInHandler(service service.AuthService, logger *zap.Logger) *logInHand
 }
 
 func (handler *logInHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	userSession, _ := tools.CheckIfAuthenticated(r,handler.logger)
+	if userSession != nil {
+		tools.HandleErrors(w,httpError.NewForbiddenError("You are already logged in"),handler.logger)
+		return
+	}
+
 	var userCreds model.Credentials
 	err := json.NewDecoder(r.Body).Decode(&userCreds)
 	if err != nil {
