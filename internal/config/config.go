@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -10,9 +11,9 @@ import (
 )
 
 type Config struct {
-    Env         string `yaml:"env" env-default:"development"`
     HTTPServer `yaml:"http_server"`
     PostgresDB `yaml:"postgres"`
+    RedisDB `yaml:"redis"`
 }
 
 type HTTPServer struct {
@@ -22,11 +23,18 @@ type HTTPServer struct {
 }
 
 type PostgresDB struct {
-    Host string `yaml:"host"`
-    Port string `yaml:"port"`
-    User string `yaml:"user"`
-    Password string `yaml:"password"`
-    DatabaseName string `yaml:"db_name"`
+    PostgresHost string `yaml:"host"`
+    PostgresPort string `yaml:"port"`
+    PostgresUser string `yaml:"user"`
+    PostgresPassword string `yaml:"password"`
+    PostgresDatabaseName string `yaml:"db_name"`
+}
+
+type RedisDB struct {
+    RedisAddr string `yaml:"addr"`
+    RedisPassword string `yaml:"password"`
+    RedisDB int `yaml:"db"`
+    RedisUsername string `yaml:"username"`
 }
 
 func NewConfig(logger *zap.Logger) *Config {
@@ -41,10 +49,14 @@ func NewConfig(logger *zap.Logger) *Config {
     
     data, err := os.ReadFile(path)
     if err != nil {
-        return nil
+        logger.Fatal("Error reading file")
     }
     replaced := os.ExpandEnv(string(data))
     cfg := &Config{}
     err = yaml.Unmarshal([]byte(replaced), cfg)
+    
+    if err != nil{
+        logger.Fatal(fmt.Sprintf("Error creating Config. Error: %s",err))
+    }
     return cfg
 }

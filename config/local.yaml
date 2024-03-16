@@ -1,6 +1,5 @@
-env: "local"
 http_server:
-  address: "localhost:8080"
+  address: "localhost:8000"
   timeout: 4s
   idle_timeout: 30s
 postgres:
@@ -9,3 +8,8 @@ postgres:
   user: ${POSTGRES_USER}
   password: ${POSTGRES_PASSWORD}
   db_name: ${POSTGRES_DB}
+redis:
+  addr: ${REDIS_ADDRESS}
+  password: ${REDIS_PASSWORD}
+  db: ${REDIS_DB}
+  username: ${REDIS_USERNAME}

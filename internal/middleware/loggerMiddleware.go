@@ -7,16 +7,16 @@ import (
 	"go.uber.org/zap"
 )
 
-type LoggerMiddleware struct {
-	Logger *zap.Logger
+type loggerMiddleware struct {
+	logger *zap.Logger
 }
 
-func NewLoggerMiddleware(logger *zap.Logger) *LoggerMiddleware{
-	return &LoggerMiddleware{
-		Logger:logger,
+func NewLoggerMiddleware(logger *zap.Logger) *loggerMiddleware{
+	return &loggerMiddleware{
+		logger:logger,
 	}
 }
 
-func (lm *LoggerMiddleware) GetMiddlewareFunc() func(http.Handler) http.Handler{
-	return zapchi.Logger(lm.Logger,"")
+func (lm *loggerMiddleware) GetMiddlewareFunc() func(http.Handler) http.Handler{
+	return zapchi.Logger(lm.logger,"")
 }

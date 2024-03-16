@@ -1,6 +1,7 @@
 package router
 
 import (
+	"fmt"
 	"redGlow/internal/handler"
 	"redGlow/internal/middleware"
 
@@ -14,7 +15,7 @@ func NewChiRouter(handlers []handler.Handler, middlewares []middleware.Middlewar
 	}
 	
 	for _, handler := range handlers{
-		router.Method(handler.HTTPMethod(),handler.Pattern(),handler)
+		router.Method(handler.HTTPMethod(),fmt.Sprintf("/%s",handler.Pattern()),handler)
 	}
 	
 	return router

@@ -21,26 +21,33 @@ $$
 BEGIN
     UPDATE users SET is_active=true WHERE email=user_email;
     IF NOT FOUND THEN
-        RAISE EXCEPTION 'Incorrect old password';
+        RAISE EXCEPTION 'Incorrect email';
     END IF;
 END;
 $$;
+
+DROP FUNCTION check_user_by_credits;
 
 CREATE OR REPLACE FUNCTION check_user_by_credits(
     user_email VARCHAR(255),
     user_password VARCHAR(255)
 ) RETURNS TABLE (
     username VARCHAR(255),
-    email VARCHAR(255),
     photo_path VARCHAR(255),
     background_path VARCHAR(255),
-    phone_number VARCHAR(255)
+    steam_id BOOLEAN
 ) AS
 $$
 BEGIN
     RETURN QUERY
     SELECT 
-        users.username,users.email, users.photo_path,users.background_path,users.phone_number
+        users.username,
+        users.photo_path,
+        users.background_path,
+        CASE 
+            WHEN users.steam_id IS NOT NULL THEN true
+            ELSE false
+        END AS steam_id
     FROM users
     WHERE is_active=true AND users.email=user_email AND users.password=crypt(user_password, users.password);
     IF NOT FOUND THEN
@@ -49,6 +56,8 @@ BEGIN
 END;
 $$
 LANGUAGE PLPGSQL;
+
+SELECT * FROM check_user_by_credits('kirin3243@gmail.com','admin1234');
 
 CREATE OR REPLACE PROCEDURE change_password(
     user_id BIGINT,

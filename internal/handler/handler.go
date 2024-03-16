@@ -5,7 +5,7 @@ import (
 )
 
 type Handler interface {
-  http.Handler
-  Pattern() string
-  HTTPMethod() string
+	http.Handler
+	Pattern() string
+	HTTPMethod() string
 }

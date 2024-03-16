@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"redGlow/internal/config"
 	"redGlow/internal/database"
-	"redGlow/internal/database/postgres"
 	"redGlow/internal/handler"
 	authHandler "redGlow/internal/handler/auth"
 	"redGlow/internal/httpserver"
@@ -33,7 +32,8 @@ func main(){
             config.NewConfig,
             zap.NewProduction,
             context.Background,
-            AsDatabase(postgres.NewPostgresDB),
+            database.NewRedisDB,
+            database.NewPostgresDB,
             fx.Annotate(
                 authService.NewAuthService,
                 fx.As(new(service.AuthService)),
@@ -43,7 +43,10 @@ func main(){
                 fx.As(new(repository.AuthRepository)),
             ),
             AsMiddleware(middleware.NewLoggerMiddleware),
-            AsHandler(authHandler.NewSignUp),  
+            AsMiddleware(middleware.NewHeaderMiddleware),
+            AsMiddleware(middleware.NewAuthMiddleware),
+            AsHandler(authHandler.NewLogInHandler),  
+            AsHandler(authHandler.NewLogOutHandler),
             fx.Annotate(
                 router.NewChiRouter,
                 fx.ParamTags(`group:"handlers"`, `group:"middlewares"`),
@@ -68,12 +71,5 @@ func AsMiddleware(f any) any{
         f,
         fx.As(new(middleware.Middleware)),
         fx.ResultTags(`group:"middlewares"`),
-    )
-}
-
-func AsDatabase(f any) any {
-    return fx.Annotate(
-        f,
-        fx.As(new(database.Database)),
     )
 }
