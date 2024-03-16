@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	"crypto"
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
@@ -12,6 +11,7 @@ import (
 	"redGlow/internal/model"
 	"redGlow/internal/repository"
 	"redGlow/internal/service"
+	"redGlow/internal/tools"
 )
 
 var _ service.AuthService = (*authService)(nil)
@@ -46,20 +46,35 @@ func (service *authService) Login(ctx context.Context, creds *model.Credentials,
 	if err != nil {
 		return nil, err
 	}
-	userSession.HashedSessionID = service.HashSessionID(ctx, unhashedSessionID)
-	
+	unhashedCsrfToken, err := service.GenerateCsrfToken()
+	if err != nil {
+		return nil, err
+	}
+
+	userSession.HashedSessionID = tools.HashString(unhashedSessionID)
+	userSession.HashedCsrfToken = tools.HashString(unhashedCsrfToken)
+
 	if err := service.repo.SaveSessionID(ctx, userSession, service.cfg.AuthSettings.SessionExpiration); err != nil {
 		return nil, err
 	}
 
-	cookie := &http.Cookie{
+	sessionIDCookie := &http.Cookie{
 		Name: service.cfg.AuthSettings.SessionCookieName,
 		Value: unhashedSessionID,
 		MaxAge: int(service.cfg.AuthSettings.SessionExpiration.Seconds()),
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 	}
-	http.SetCookie(w,cookie)
+	http.SetCookie(w,sessionIDCookie)
+
+	csrfTokenCookie := &http.Cookie{
+		Name: service.cfg.AuthSettings.CSRFTokenCookiename,
+		Value: unhashedCsrfToken,
+		MaxAge: int(service.cfg.AuthSettings.SessionExpiration.Seconds()),
+		HttpOnly: false,
+		SameSite: http.SameSiteStrictMode,
+	}
+	http.SetCookie(w,csrfTokenCookie)
 
 	return &userSession.UserData, nil
 }
@@ -84,17 +99,22 @@ func (service *authService) GenerateSessionID(session *model.UserSession) (strin
 	return fmt.Sprintf("%d%s%d", session.UserData.ID, bytesAsStr, session.UserMetaData.ID), nil
 }
 
-func (service *authService) HashSessionID(ctx context.Context, sessionID string) string{
-	hasher := crypto.SHA256.New()
-	hasher.Write([]byte(sessionID))
-	hashedBytes := hasher.Sum(nil)
-	return hex.EncodeToString(hashedBytes)
-}
-
-func (service *authService) DeleteSession(ctx context.Context, sessionID string) httpError.HTTPError {
+func (service *authService) LogOut(ctx context.Context, sessionID string) httpError.HTTPError {
 	return service.repo.DeleteSession(ctx, sessionID)
 }
 
-func (service *authService) GetSession(ctx context.Context, sessionID string) (*model.UserSession, error) {
-	return service.repo.GetSession(ctx, service.HashSessionID(ctx, sessionID))
+func (service *authService) GetUserSession(ctx context.Context, sessionID string) (*model.UserSession, error) {
+	return service.repo.GetSession(ctx, tools.HashString(sessionID))
+}
+
+func (service *authService) GenerateCsrfToken() (string, httpError.HTTPError){
+	randomBytes := make([]byte, 32)
+
+    _,err := rand.Read(randomBytes)
+	if err != nil{
+		return "", httpError.NewInternalServerError(err.Error())
+	}
+
+	bytesAsStr := hex.EncodeToString(randomBytes)
+	return bytesAsStr, nil
 }

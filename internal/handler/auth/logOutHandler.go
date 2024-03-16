@@ -2,6 +2,7 @@ package auth
 
 import (
 	"net/http"
+	"redGlow/internal/config"
 	"redGlow/internal/handler"
 	"redGlow/internal/service"
 	"redGlow/internal/tools"
@@ -15,23 +16,25 @@ var _ handler.Handler = (*logOutHandler)(nil)
 type logOutHandler struct {
 	logger *zap.Logger
 	service service.AuthService
+	cfg *config.Config
 }
 
-func NewLogOutHandler(logger *zap.Logger, service service.AuthService) *logOutHandler{
+func NewLogOutHandler(logger *zap.Logger, service service.AuthService, cfg *config.Config) *logOutHandler{
 	return &logOutHandler{
 		logger: logger,
 		service: service,
+		cfg: cfg,
 	}
 }
 
 func (handler *logOutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	userSession, err := tools.CheckIfAuthenticated(r,handler.logger)
+	userSession, err := tools.CheckIfAuthenticated(r,handler.logger, handler.cfg.AuthSettings.UserSessionContextKey)
 	if err != nil {
 		tools.HandleErrors(w,err,handler.logger)
 		return
 	}
 
-	err = handler.service.DeleteSession(r.Context(), userSession.HashedSessionID)
+	err = handler.service.LogOut(r.Context(), userSession.HashedSessionID)
 	
 	if err != nil{
 		tools.HandleErrors(w, err, handler.logger)

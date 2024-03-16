@@ -1,11 +1,10 @@
-package middleware
+package auth
 
 import (
 	"context"
 	"net/http"
 	"redGlow/internal/config"
 	"redGlow/internal/service"
-	"redGlow/internal/tools"
 
 	"go.uber.org/zap"
 )
@@ -32,13 +31,13 @@ func getContext(am *authMiddleware, r *http.Request) context.Context{
 		return r.Context()
 	}
 
-	userSession, _ := am.service.GetSession(r.Context(),sessionID.Value)
+	userSession, _ := am.service.GetUserSession(r.Context(),sessionID.Value)
 
 	if userSession == nil {
 		return r.Context()
 	}
 	
-	return context.WithValue(r.Context(), tools.ContextSessionKey, userSession)
+	return context.WithValue(r.Context(), am.cfg.AuthSettings.UserSessionContextKey, userSession)
 }
 
 func middlewareFunc(am *authMiddleware) func(http.Handler) http.Handler{
@@ -54,4 +53,8 @@ func middlewareFunc(am *authMiddleware) func(http.Handler) http.Handler{
 
 func (am *authMiddleware) GetMiddlewareFunc() func(http.Handler) http.Handler{
 	return middlewareFunc(am)
+}
+
+func (am *authMiddleware) Priority() int{
+	return 3
 }

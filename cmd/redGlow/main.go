@@ -9,6 +9,10 @@ import (
 	authHandler "redGlow/internal/handler/auth"
 	"redGlow/internal/httpserver"
 	"redGlow/internal/middleware"
+	authMiddleware "redGlow/internal/middleware/auth"
+	csrfMiddleware "redGlow/internal/middleware/csrf"
+	headersMiddleware "redGlow/internal/middleware/headers"
+	loggerMiddleware "redGlow/internal/middleware/logger"
 	"redGlow/internal/repository"
 	authRepository "redGlow/internal/repository/auth"
 	"redGlow/internal/router"
@@ -42,9 +46,10 @@ func main(){
                 authRepository.NewAuthRepository,
                 fx.As(new(repository.AuthRepository)),
             ),
-            AsMiddleware(middleware.NewLoggerMiddleware),
-            AsMiddleware(middleware.NewHeaderMiddleware),
-            AsMiddleware(middleware.NewAuthMiddleware),
+            AsMiddleware(loggerMiddleware.NewLoggerMiddleware),
+            AsMiddleware(headersMiddleware.NewHeaderMiddleware),
+            AsMiddleware(csrfMiddleware.NewCsrfMiddleware),
+            AsMiddleware(authMiddleware.NewAuthMiddleware),
             AsHandler(authHandler.NewLogInHandler),  
             AsHandler(authHandler.NewLogOutHandler),
             fx.Annotate(

@@ -3,6 +3,7 @@ package auth
 import (
 	"encoding/json"
 	"net/http"
+	"redGlow/internal/config"
 	"redGlow/internal/httpError"
 	"redGlow/internal/model"
 	"redGlow/internal/service"
@@ -14,17 +15,19 @@ import (
 type logInHandler struct{
 	service service.AuthService
 	logger *zap.Logger
+	cfg *config.Config
 }
 
-func NewLogInHandler(service service.AuthService, logger *zap.Logger) *logInHandler{
+func NewLogInHandler(service service.AuthService, logger *zap.Logger, cfg *config.Config) *logInHandler{
 	return &logInHandler{
 		service: service,
 		logger: logger,
+		cfg: cfg,
 	}
 }
 
 func (handler *logInHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	userSession, _ := tools.CheckIfAuthenticated(r,handler.logger)
+	userSession, _ := tools.CheckIfAuthenticated(r,handler.logger,handler.cfg.AuthSettings.UserSessionContextKey)
 	if userSession != nil {
 		tools.HandleErrors(w,httpError.NewForbiddenError("You are already logged in"),handler.logger)
 		return

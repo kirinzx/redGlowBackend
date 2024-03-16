@@ -1,4 +1,4 @@
-package middleware
+package headers
 
 import (
 	"net/http"
@@ -23,4 +23,8 @@ func (hm *headerMiddleware) middlrwareFunc(next http.Handler) http.Handler {
 
 func (hm *headerMiddleware) GetMiddlewareFunc() func(http.Handler) http.Handler{
 	return hm.middlrwareFunc
+}
+
+func (hm *headerMiddleware) Priority() int{
+	return 2
 }

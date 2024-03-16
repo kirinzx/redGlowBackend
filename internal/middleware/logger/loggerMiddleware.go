@@ -1,4 +1,4 @@
-package middleware
+package logger
 
 import (
 	"net/http"
@@ -19,4 +19,8 @@ func NewLoggerMiddleware(logger *zap.Logger) *loggerMiddleware{
 
 func (lm *loggerMiddleware) GetMiddlewareFunc() func(http.Handler) http.Handler{
 	return zapchi.Logger(lm.logger,"")
+}
+
+func (lm *loggerMiddleware) Priority() int {
+	return 1
 }

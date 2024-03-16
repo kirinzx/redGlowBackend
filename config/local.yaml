@@ -18,3 +18,6 @@ auth:
   secret_word: ${SECRET_WORD}
   session_expiration: 744h
   session_cookie_name: "sessionID"
+  csrftoken_cookie_name: "csrftoken"
+  csrftoken_header_name: "X-CSRFTOKEN"
+  user_session_context_key: "userSession"

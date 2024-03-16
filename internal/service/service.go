@@ -14,7 +14,7 @@ type AuthService interface{
 	ChangePassword(ctx context.Context, passwordChange *model.PasswordChange, session *model.UserSession) httpError.HTTPError
 	ChangeForgottenPassword(ctx context.Context, passwordChange *model.PasswordChange, email string) httpError.HTTPError
 	GenerateSessionID(session *model.UserSession) (string, httpError.HTTPError)
-	HashSessionID(ctx context.Context, sessionID string) string
-	DeleteSession(ctx context.Context, sessionID string) httpError.HTTPError
-	GetSession(ctx context.Context, sessionID string) (*model.UserSession, error)
+	LogOut(ctx context.Context, sessionID string) httpError.HTTPError
+	GetUserSession(ctx context.Context, sessionID string) (*model.UserSession, error)
+	GenerateCsrfToken() (string, httpError.HTTPError)
 }

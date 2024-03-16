@@ -20,6 +20,8 @@ func NewRedisDB(cfg *config.Config) *RedisDB{
 			Password: cfg.Redis.RedisPassword,
 			Username: cfg.Redis.RedisUsername,
 			DB: cfg.Redis.RedisDB,
+			PoolFIFO: true,
+			PoolSize: 25,
 		}),
 	}
 }

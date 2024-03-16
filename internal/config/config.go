@@ -43,6 +43,9 @@ type Auth struct {
     SecretWord string `yaml:"secret_word"`
     SessionExpiration time.Duration `yaml:"session_expiration"`
     SessionCookieName string `yaml:"session_cookie_name"`
+    CSRFTokenCookiename string `yaml:"csrftoken_cookie_name"`
+    CSRFTokenHeaderName string `yaml:"csrftoken_header_name"`
+    UserSessionContextKey string `yaml:"user_session_context_key"`
 }
 
 func NewConfig(logger *zap.Logger) *Config {

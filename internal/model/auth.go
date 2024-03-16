@@ -2,6 +2,7 @@ package model
 
 type UserSession struct{
 	HashedSessionID string
+	HashedCsrfToken string
 	UserData UserGeneralInfo
 	UserMetaData UserMetaData
 }
