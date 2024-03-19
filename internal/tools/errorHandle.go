@@ -1,12 +1,17 @@
 package tools
 
 import (
-	"fmt"
+	"encoding/json"
 	"net/http"
 	"redGlow/internal/httpError"
+	"strings"
 
 	"go.uber.org/zap"
 )
+
+type errorResponse struct {
+	Errors []string `json:"errors"`
+}
 
 func HandleErrors(w http.ResponseWriter, err httpError.HTTPError, logger *zap.Logger) {
 	w.WriteHeader(err.Status())
@@ -15,7 +20,10 @@ func HandleErrors(w http.ResponseWriter, err httpError.HTTPError, logger *zap.Lo
 		logger.Error(err.Error())
 		response = []byte(`{"error":"Whoops. Something went wrong"}`)
 	} else {
-		response = []byte(fmt.Sprintf(`{"error":"%s"}`,err.Error()))
+		errResponse := errorResponse{
+			Errors: strings.Split(err.Error(), ";"),
+		}
+		response, _ = json.Marshal(errResponse)
 	}
 	w.Write(response)
 }

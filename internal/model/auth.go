@@ -1,30 +1,29 @@
 package model
 
 type UserSession struct{
-	HashedSessionID string
-	HashedCsrfToken string
-	UserData UserGeneralInfo
-	UserMetaData UserMetaData
+	HashedSessionID string `json:"HashedSessionID"`
+	HashedCsrfToken string `json:"HashedCsrfToken"`
+	UserData UserGeneralInfo `json:"UserData"`
+	UserMetaData UserMetaData `json:"UserMetaData"`
 }
 
 type Credentials struct{
-	Email string `json:"email"`
-	Password string `json:"password"`
+	Email string `json:"email" validate:"email,required"`
+	Password string `json:"password" validate:"required"`
 }
 
 type UserSignUp struct {
-	Email string `json:"email"`
-	Password string `json:"password"`
-	Username string `json:"username"`
+	Email string `json:"email" validate:"email,required"`
+	Password string `json:"password" validate:"required"`
+	Username string `json:"username" validate:"required"`
 }
 
 type Confirmation struct {
-	Email string `json:"email"`
-	Code string `json:"code"`
+	Email string `json:"email" validate:"email,required"`
+	Code string `json:"code" validate:"required"`
 }
 
 type PasswordChange struct {
-	OldPassword string `json:"oldPassword"`
-	NewPassword *string `json:"newPassword"`
-	Session UserSession
+	OldPassword *string `json:"oldPassword" validate:"required"`
+	NewPassword string `json:"newPassword" validate:"required"`
 }

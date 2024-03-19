@@ -12,9 +12,9 @@ const (
 )
 
 type Friendship struct{
-	ID int
-	inviterID int
-	accepterID int
-	status StatusName
-	createdAt time.Time
+	ID int `json:"id"`
+	InviterID int `json:"inviter_id"`
+	AccepterID int `json:"accepter_id"`
+	Status StatusName `json:"status"`
+	CreatedAt time.Time `json:"created_at"`
 }

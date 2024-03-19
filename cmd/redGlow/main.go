@@ -18,6 +18,7 @@ import (
 	"redGlow/internal/router"
 	"redGlow/internal/service"
 	authService "redGlow/internal/service/auth"
+	"redGlow/internal/validation"
 
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
@@ -38,6 +39,7 @@ func main(){
             context.Background,
             database.NewRedisDB,
             database.NewPostgresDB,
+            validation.NewCustomValidator,
             fx.Annotate(
                 authService.NewAuthService,
                 fx.As(new(service.AuthService)),

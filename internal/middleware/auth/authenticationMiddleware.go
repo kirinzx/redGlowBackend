@@ -26,6 +26,10 @@ func NewAuthMiddleware(service service.AuthService, logger *zap.Logger, cfg *con
 func getContext(am *authMiddleware, r *http.Request) context.Context{
 	sessionID, err := r.Cookie(am.cfg.AuthSettings.SessionCookieName)
 	
+	if err == http.ErrNoCookie {
+		return r.Context()
+	}
+
 	if err != nil {
 		am.logger.Error(err.Error())
 		return r.Context()
