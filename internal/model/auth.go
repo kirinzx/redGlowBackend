@@ -18,7 +18,7 @@ type UserSignUp struct {
 	Username string `json:"username" validate:"required"`
 }
 
-type Confirmation struct {
+type EmailConfirmation struct {
 	Email string `json:"email" validate:"email,required"`
 	Code string `json:"code" validate:"required"`
 }

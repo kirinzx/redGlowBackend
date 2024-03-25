@@ -33,7 +33,7 @@ func (service *authService) SignUp(ctx context.Context, userSignUp *model.UserSi
 	return nil
 }
 
-func (service *authService) ConfirmSignUp(ctx context.Context, confirmation *model.Confirmation) (*model.UserSession, httpError.HTTPError){
+func (service *authService) ConfirmSignUp(ctx context.Context, confirmation *model.EmailConfirmation) (*model.UserSession, httpError.HTTPError){
 	return nil,nil
 }
 

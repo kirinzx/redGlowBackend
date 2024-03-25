@@ -22,6 +22,7 @@ type UserGeneralInfo struct {
 	SteamID bool `json:"steamId" db:"steam_id"`
 	PhotoPath *string `json:"photo" db:"photo_path"`
 	BackgroundPath *string `json:"background" db:"background_path"`
+	Email string `json:"email" db:"email"`
 }
 
 type UserMetaData struct{
