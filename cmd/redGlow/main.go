@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"redGlow/internal/config"
+	"redGlow/internal/customsmtp"
 	"redGlow/internal/database"
 	"redGlow/internal/handler"
 	authHandler "redGlow/internal/handler/auth"
@@ -40,6 +41,7 @@ func main(){
             database.NewRedisDB,
             database.NewPostgresDB,
             validation.NewCustomValidator,
+            customsmtp.NewSMTPService,
             fx.Annotate(
                 authService.NewAuthService,
                 fx.As(new(service.AuthService)),

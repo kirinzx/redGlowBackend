@@ -2,7 +2,6 @@ package auth
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"redGlow/internal/config"
 	"redGlow/internal/httpError"
@@ -48,7 +47,7 @@ func (handler *logInHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		tools.HandleErrors(w, httpError.NewBadRequestError(handler.validator.MakePrettyErrors(err)), handler.logger)
 		return
 	}
-	handler.logger.Info(fmt.Sprint(userCreds))
+
 	userData, err := handler.service.Login(r.Context(), &userCreds, w)
 	if err != nil{
 		tools.HandleErrors(w, err, handler.logger)

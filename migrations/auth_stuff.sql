@@ -112,7 +112,17 @@ BEGIN
     SET password = crypt(new_password, gen_salt('bf'))
     WHERE email = user_email;
     IF NOT FOUND THEN
-        RAISE EXCEPTION 'Incorrect old password';
+        RAISE EXCEPTION 'Incorrect email';
     END IF;
 END;
 $$;
+
+CREATE OR REPLACE FUNCTION check_email(
+    user_email VARCHAR(255)
+) RETURNS BOOLEAN AS
+$$
+BEGIN
+    RETURN QUERY SELECT EXISTS(SELECT * FROM users WHERE email=user_email);
+END;
+$$
+LANGUAGE plpgsql;

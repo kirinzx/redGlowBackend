@@ -3,6 +3,9 @@ http_server:
   port: "8000"
   timeout: 4s
   idle_timeout: 30s
+frontend_server:
+  host: "localhost"
+  scheme: "http"
 postgres:
   port: ${POSTGRES_PORT}
   host: ${POSTGRES_HOST}
@@ -15,9 +18,16 @@ redis:
   db: ${REDIS_DB}
   username: ${REDIS_USERNAME}
 auth:
-  secret_word: ${SECRET_WORD}
   session_expiration: 744h
   session_cookie_name: "sessionID"
   csrftoken_cookie_name: "csrftoken"
   csrftoken_header_name: "X-CSRFTOKEN"
   user_session_context_key: "userSession"
+  code_expiration: 15m
+  sign_up_confirm_front_uri: "signUp/confirm"
+  recovery_password_front_uri: "user/password/recovery"
+email:
+  host_user: ${EMAIL_HOST_USER}
+  host: ${EMAIL_HOST}
+  host_password: ${EMAIL_HOST_PASSWORD}
+  port: ${EMAIL_PORT}

@@ -2,9 +2,12 @@ package database
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"redGlow/internal/config"
+	"redGlow/internal/httpError"
 
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 )
@@ -31,4 +34,15 @@ func NewPostgresDB(cfg *config.Config, ctx context.Context, logger *zap.Logger) 
 
 func (pdb *PostgresDB) Connect(ctx context.Context) (*pgxpool.Conn,error){
 	return pdb.Pool.Acquire(ctx)
+}
+
+func (pdb *PostgresDB) HandleErrors(err error) httpError.HTTPError {
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			return httpError.NewBadRequestError(pgErr.Message)
+		}
+		return httpError.NewInternalServerError(pgErr.Message)
+	}
+	return nil
 }
